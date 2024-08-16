@@ -1,58 +1,3 @@
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_dir  = "../lambda/fetch_crypto_price/"
-  output_path = "lambda_function.zip"
-}
-
-module "label_lambda" {
-  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=main"
-  namespace   = var.namespace
-  environment = var.environment
-  stage       = var.stage
-  name        = "lambda_fetch_crypto_price"
-  label_order = ["namespace", "stage", "environment", "name", "attributes"]
-  tags = {
-    "Terraform" = "true"
-  }
-}
-
-resource "aws_iam_role" "lambda_execution_role" {
-  name = "${module.label_lambda.id}_role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        },
-      },
-    ],
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_logging_policy" {
-  role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_lambda_function" "lambda_function" {
-  function_name = module.label_lambda.name
-  role          = aws_iam_role.lambda_execution_role.arn
-  handler       = "app.lambda_handler"
-  runtime       = "python3.9"
-  filename      = data.archive_file.lambda_zip.output_path
-
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-
-  environment {
-    variables = {
-      LOG_LEVEL = "INFO"
-    }
-  }
-}
-
 resource "aws_lambda_permission" "allow_api_gateway" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
@@ -95,8 +40,4 @@ resource "aws_api_gateway_deployment" "api_deployment" {
 
 output "api_url" {
   value = aws_api_gateway_deployment.api_deployment.invoke_url
-}
-
-output "lambda_function_arn" {
-  value = aws_lambda_function.lambda_function.arn
 }

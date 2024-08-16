@@ -1,4 +1,4 @@
-aws_region  = "us-east-1"
+aws_region  = "ca-central-1"
 namespace   = "andytang"
 environment = "aws"
 stage       = "prod"
