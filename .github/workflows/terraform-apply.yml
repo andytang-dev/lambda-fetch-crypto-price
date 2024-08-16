@@ -2,7 +2,11 @@ name: Terraform Apply
 
 on:
   workflow_dispatch:
-
+    inputs:
+      apply:
+        description: 'Set to "true" to apply the Terraform module'
+        required: true
+        default: "false"
 jobs:
   terraform:
     name: terraform apply
@@ -32,5 +36,5 @@ jobs:
       run: terraform -chdir=terraform plan -var-file=vars/prod.tfvars
 
     - name: Terraform Apply
-      if: steps.confirmation.outputs.confirm == 'yes'
+      if: github.event.inputs.apply == 'true'
       run: terraform -chdir=terraform apply -var-file=vars/prod.tfvars -auto-approve
