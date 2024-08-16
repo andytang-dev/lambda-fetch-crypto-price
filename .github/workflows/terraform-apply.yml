@@ -31,17 +31,6 @@ jobs:
       id: terraform-plan
       run: terraform -chdir=terraform plan -var-file=vars/prod.tfvars
 
-    - name: Confirmation Prompt
-      id: confirmation
-      run: |
-        echo "::set-output name=confirm::$(echo 'no')"
-        echo "Do you want to proceed with 'terraform apply'? (yes/no)"
-        read confirmation
-        if [[ "$confirmation" == "yes" ]]; then
-          echo "::set-output name=confirm::$(echo 'yes')"
-        fi
-      shell: bash
-
     - name: Terraform Apply
       if: steps.confirmation.outputs.confirm == 'yes'
       run: terraform -chdir=terraform apply -var-file=vars/prod.tfvars -auto-approve
