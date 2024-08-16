@@ -22,7 +22,7 @@ resource "null_resource" "cleanup_dependencies" {
   }
   provisioner "local-exec" {
     command = <<EOT
-    find ../lambda/fetch_crypto_price ! -path '../lambda/fetch_crypto_price/app.py' ! -path '../lambda/fetch_crypto_price/requirements.txt' ! -path '../lambda/fetch_crypto_price/.gitignore' ! -path '../lambda/fetch_crypto_price' -exec rm -rf {} +
+    find ../lambda/fetch_crypto_price ! -path '../lambda/fetch_crypto_price/app.py' ! -path '../lambda/fetch_crypto_price/requirements.txt' ! -path '../lambda/fetch_crypto_price/.gitignore' ! -path '../lambda/fetch_crypto_price' -exec rm -rf {} + || true
     EOT
   }
   depends_on = [data.archive_file.lambda_zip]
